@@ -191,4 +191,4 @@ SELECT status, COUNT(*) FROM submissions GROUP BY status;
 
 ---
 
-Built with ❤️ for Kaitra.ai
+
