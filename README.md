@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Kaitra.ai — Full Stack Setup Guide
 
 ## Project Structure
@@ -192,3 +193,6 @@ SELECT status, COUNT(*) FROM submissions GROUP BY status;
 ---
 
 
+=======
+# kaitra
+>>>>>>> f877958 (Initial commit)
