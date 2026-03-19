@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Kaitra.ai — Admin Panel</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;700;900&family=Rajdhani:wght@400;500;600;700&family=Space+Mono&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --bg:      #050810;
+      --card:    #090d1a;
+      --border:  rgba(0,200,255,.15);
+      --cyan:    #00c8ff;
+      --teal:    #0af0d8;
+      --white:   #eef4ff;
+      --silver:  #c8d8e8;
+      --muted:   #5a6a8a;
+      --danger:  #ff5f57;
+      --success: #28c840;
+      --warn:    #febc2e;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: var(--bg); color: var(--white); font-family: 'Rajdhani', sans-serif; font-size: 15px; }
+
+    /* ── SIDEBAR ── */
+    .layout { display: flex; min-height: 100vh; }
+    .sidebar {
+      width: 220px; flex-shrink: 0;
+      background: var(--card);
+      border-right: 1px solid var(--border);
+      display: flex; flex-direction: column; padding: 1.5rem 1rem;
+      position: sticky; top: 0; height: 100vh;
+    }
+    .sidebar-logo {
+      display: flex; align-items: center; gap: 10px;
+      margin-bottom: 2rem; padding-bottom: 1.5rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .sidebar-logo img { width: 36px; height: 36px; border-radius: 50%; box-shadow: 0 0 12px rgba(0,200,255,.4); }
+    .sidebar-logo span {
+      font-family: 'Orbitron', monospace; font-size: .95rem; font-weight: 700;
+      background: linear-gradient(90deg, var(--cyan), var(--teal));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    .nav-item {
+      display: flex; align-items: center; gap: 10px;
+      padding: .65rem .9rem; border-radius: 8px;
+      color: var(--silver); font-weight: 600; letter-spacing: .04em;
+      cursor: pointer; margin-bottom: .25rem;
+      transition: background .2s, color .2s;
+    }
+    .nav-item:hover, .nav-item.active { background: rgba(0,200,255,.1); color: var(--cyan); }
+    .nav-item svg { opacity: .7; flex-shrink: 0; }
+    .sidebar-footer {
+      margin-top: auto; font-size: .75rem; color: var(--muted);
+      font-family: 'Space Mono', monospace;
+    }
+
+    /* ── MAIN ── */
+    .main { flex: 1; padding: 2rem 2.5rem; overflow-x: hidden; }
+
+    .topbar {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem;
+    }
+    .page-title {
+      font-family: 'Orbitron', monospace; font-size: 1.3rem; font-weight: 700;
+    }
+    .topbar-right { display: flex; gap: .75rem; align-items: center; flex-wrap: wrap; }
+
+    /* ── STAT CARDS ── */
+    .stats-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 1rem; margin-bottom: 2rem;
+    }
+    .stat-card {
+      background: var(--card); border: 1px solid var(--border); border-radius: 10px;
+      padding: 1.3rem 1.5rem; position: relative; overflow: hidden;
+    }
+    .stat-card::before {
+      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+      background: linear-gradient(90deg, var(--cyan), var(--teal));
+    }
+    .stat-label { font-size: .72rem; letter-spacing: .12em; color: var(--muted); text-transform: uppercase; margin-bottom: .5rem; }
+    .stat-val { font-family: 'Orbitron', monospace; font-size: 2rem; font-weight: 700; color: var(--cyan); }
+    .stat-sub { font-size: .78rem; color: var(--muted); margin-top: .3rem; }
+
+    /* ── CONTROLS ── */
+    .controls {
+      display: flex; gap: .75rem; align-items: center;
+      margin-bottom: 1.2rem; flex-wrap: wrap;
+    }
+    .search-wrap { position: relative; flex: 1; min-width: 200px; }
+    .search-wrap input {
+      width: 100%; padding: .6rem 1rem .6rem 2.4rem;
+      background: rgba(0,200,255,.05); border: 1px solid var(--border);
+      border-radius: 6px; color: var(--white); font-family: 'Rajdhani', sans-serif;
+      font-size: .95rem; outline: none; transition: border-color .2s;
+    }
+    .search-wrap input:focus { border-color: var(--cyan); }
+    .search-icon { position: absolute; left: .75rem; top: 50%; transform: translateY(-50%); color: var(--muted); }
+    select.filter {
+      padding: .6rem 2rem .6rem .9rem;
+      background: rgba(0,200,255,.05) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='7' viewBox='0 0 10 7'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%2300c8ff' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E") no-repeat right .75rem center;
+      border: 1px solid var(--border); border-radius: 6px; color: var(--silver);
+      font-family: 'Rajdhani', sans-serif; font-size: .93rem; outline: none; cursor: pointer;
+      -webkit-appearance: none;
+    }
+    select.filter option { background: #090d1a; }
+
+    /* ── BUTTONS ── */
+    .btn {
+      padding: .55rem 1.2rem; border-radius: 6px; border: none; cursor: pointer;
+      font-family: 'Rajdhani', sans-serif; font-weight: 700; font-size: .9rem;
+      letter-spacing: .04em; transition: all .2s;
+    }
+    .btn-cyan {
+      background: linear-gradient(135deg, var(--cyan), var(--teal));
+      color: #050810;
+    }
+    .btn-cyan:hover { opacity: .85; }
+    .btn-outline {
+      background: transparent; border: 1px solid var(--border); color: var(--silver);
+    }
+    .btn-outline:hover { border-color: var(--cyan); color: var(--cyan); }
+    .btn-danger { background: rgba(255,95,87,.15); border: 1px solid rgba(255,95,87,.4); color: var(--danger); }
+    .btn-danger:hover { background: rgba(255,95,87,.25); }
+    .btn-sm { padding: .3rem .75rem; font-size: .8rem; }
+
+    /* ── TABLE ── */
+    .table-wrap {
+      background: var(--card); border: 1px solid var(--border); border-radius: 12px;
+      overflow: hidden;
+    }
+    table { width: 100%; border-collapse: collapse; }
+    thead th {
+      background: rgba(0,200,255,.06); text-align: left;
+      padding: .85rem 1rem; font-size: .72rem; letter-spacing: .12em;
+      color: var(--muted); text-transform: uppercase; border-bottom: 1px solid var(--border);
+      white-space: nowrap;
+    }
+    tbody tr { border-bottom: 1px solid rgba(0,200,255,.06); transition: background .15s; }
+    tbody tr:last-child { border-bottom: none; }
+    tbody tr:hover { background: rgba(0,200,255,.04); }
+    td { padding: .9rem 1rem; vertical-align: top; }
+    .td-name { font-weight: 700; color: var(--white); }
+    .td-email { color: var(--cyan); font-size: .88rem; font-family: 'Space Mono', monospace; }
+    .td-company { color: var(--silver); font-size: .88rem; }
+    .td-msg { color: var(--muted); font-size: .85rem; max-width: 220px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .td-sectors { font-size: .8rem; color: var(--teal); }
+    .td-date { font-size: .8rem; color: var(--muted); white-space: nowrap; font-family: 'Space Mono', monospace; }
+    .td-actions { display: flex; gap: .4rem; flex-wrap: wrap; }
+
+    /* ── STATUS BADGE ── */
+    .badge {
+      display: inline-block; padding: .2rem .65rem; border-radius: 100px;
+      font-size: .72rem; letter-spacing: .08em; font-weight: 700; text-transform: uppercase;
+    }
+    .badge-new       { background: rgba(0,200,255,.15);  color: var(--cyan);    border: 1px solid rgba(0,200,255,.3); }
+    .badge-contacted { background: rgba(254,188,46,.15); color: var(--warn);    border: 1px solid rgba(254,188,46,.3); }
+    .badge-approved  { background: rgba(40,200,64,.15);  color: var(--success); border: 1px solid rgba(40,200,64,.3); }
+    .badge-rejected  { background: rgba(255,95,87,.15);  color: var(--danger);  border: 1px solid rgba(255,95,87,.3); }
+
+    /* ── PAGINATION ── */
+    .pagination {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 1rem 1.2rem; border-top: 1px solid var(--border);
+      flex-wrap: wrap; gap: .75rem;
+    }
+    .page-info { color: var(--muted); font-size: .85rem; }
+    .page-btns { display: flex; gap: .5rem; }
+
+    /* ── MODAL ── */
+    .modal-overlay {
+      display: none; position: fixed; inset: 0; z-index: 200;
+      background: rgba(5,8,16,.85); backdrop-filter: blur(6px);
+      align-items: center; justify-content: center;
+    }
+    .modal-overlay.open { display: flex; }
+    .modal {
+      background: var(--card); border: 1px solid var(--border); border-radius: 16px;
+      width: 90%; max-width: 620px; max-height: 90vh; overflow-y: auto;
+      padding: 2rem;
+    }
+    .modal-header {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-bottom: 1.5rem;
+    }
+    .modal-header h3 { font-family: 'Orbitron', monospace; font-size: 1rem; }
+    .modal-close { background: none; border: none; color: var(--muted); cursor: pointer; font-size: 1.4rem; line-height: 1; }
+    .modal-close:hover { color: var(--white); }
+    .detail-row { display: flex; gap: 1rem; margin-bottom: .9rem; }
+    .detail-key { width: 110px; flex-shrink: 0; color: var(--muted); font-size: .83rem; letter-spacing: .06em; text-transform: uppercase; padding-top: .1rem; }
+    .detail-val { color: var(--white); font-size: .93rem; line-height: 1.5; }
+    .detail-msg {
+      background: rgba(0,200,255,.05); border-left: 3px solid var(--cyan);
+      padding: 1rem 1.2rem; border-radius: 0 8px 8px 0;
+      color: var(--silver); font-size: .9rem; line-height: 1.6; margin-bottom: 1.5rem;
+    }
+    .modal-status-row { display: flex; gap: .75rem; align-items: center; flex-wrap: wrap; margin-bottom: 1rem; }
+    textarea.notes-input {
+      width: 100%; min-height: 80px; background: rgba(0,200,255,.05);
+      border: 1px solid var(--border); border-radius: 6px;
+      color: var(--white); font-family: 'Rajdhani', sans-serif; font-size: .93rem;
+      padding: .75rem 1rem; resize: vertical; outline: none;
+    }
+    textarea.notes-input:focus { border-color: var(--cyan); }
+
+    /* ── TOAST ── */
+    .toast {
+      position: fixed; bottom: 2rem; right: 2rem; z-index: 300;
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 10px; padding: 1rem 1.5rem;
+      font-size: .9rem; color: var(--white);
+      display: flex; align-items: center; gap: .6rem;
+      transform: translateY(100px); opacity: 0;
+      transition: all .3s cubic-bezier(.34,1.56,.64,1);
+      pointer-events: none;
+    }
+    .toast.show { transform: translateY(0); opacity: 1; }
+    .toast.success { border-color: rgba(40,200,64,.4); }
+    .toast.error   { border-color: rgba(255,95,87,.4); }
+
+    /* ── EMPTY STATE ── */
+    .empty-state { text-align: center; padding: 4rem 2rem; color: var(--muted); }
+    .empty-state .icon { font-size: 3rem; margin-bottom: 1rem; }
+    .empty-state p { font-size: .95rem; }
+
+    /* ── LOADING ── */
+    .spinner {
+      width: 20px; height: 20px; border-radius: 50%;
+      border: 2px solid rgba(0,200,255,.2);
+      border-top-color: var(--cyan);
+      animation: spin 0.7s linear infinite; display: inline-block;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    @media (max-width: 768px) {
+      .sidebar { display: none; }
+      .main { padding: 1.2rem; }
+    }
+  </style>
+</head>
+<body>
+<div class="layout">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <img src="logo.jpeg" alt="Logo"/>
+      <span>KAITRA.AI</span>
+    </div>
+    <div class="nav-item active" onclick="showView('submissions')">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/></svg>
+      Submissions
+    </div>
+    <div class="nav-item" onclick="showView('stats')">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+      Analytics
+    </div>
+    <div class="nav-item" onclick="exportCSV()">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+      Export CSV
+    </div>
+    <div class="sidebar-footer">
+      Admin Panel v1.0<br/>Kaitra.ai © 2025
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main">
+
+    <!-- ── SUBMISSIONS VIEW ── -->
+    <div id="view-submissions">
+      <div class="topbar">
+        <div class="page-title">Early Access Submissions</div>
+        <div class="topbar-right">
+          <button class="btn btn-outline" onclick="loadSubmissions()">⟳ Refresh</button>
+          <button class="btn btn-cyan"    onclick="exportCSV()">↓ Export CSV</button>
+        </div>
+      </div>
+
+      <!-- STAT CARDS -->
+      <div class="stats-grid" id="miniStats">
+        <div class="stat-card">
+          <div class="stat-label">Total</div>
+          <div class="stat-val" id="sc-total">—</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">New</div>
+          <div class="stat-val" id="sc-new" style="color:#00c8ff">—</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Contacted</div>
+          <div class="stat-val" id="sc-contacted" style="color:#febc2e">—</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Approved</div>
+          <div class="stat-val" id="sc-approved" style="color:#28c840">—</div>
+        </div>
+      </div>
+
+      <!-- CONTROLS -->
+      <div class="controls">
+        <div class="search-wrap">
+          <svg class="search-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input type="text" id="searchInput" placeholder="Search by name, email, company…" oninput="debounceSearch()"/>
+        </div>
+        <select class="filter" id="statusFilter" onchange="loadSubmissions()">
+          <option value="">All Statuses</option>
+          <option value="new">New</option>
+          <option value="contacted">Contacted</option>
+          <option value="approved">Approved</option>
+          <option value="rejected">Rejected</option>
+        </select>
+      </div>
+
+      <!-- TABLE -->
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Name / Company</th>
+              <th>Email</th>
+              <th>Sectors</th>
+              <th>Message</th>
+              <th>Status</th>
+              <th>Date</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="tableBody">
+            <tr><td colspan="8"><div class="empty-state"><div class="spinner"></div></div></td></tr>
+          </tbody>
+        </table>
+        <div class="pagination">
+          <span class="page-info" id="pageInfo">Loading…</span>
+          <div class="page-btns">
+            <button class="btn btn-outline btn-sm" id="btnPrev" onclick="prevPage()" disabled>← Prev</button>
+            <button class="btn btn-outline btn-sm" id="btnNext" onclick="nextPage()">Next →</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── ANALYTICS VIEW ── -->
+    <div id="view-stats" style="display:none">
+      <div class="topbar">
+        <div class="page-title">Analytics</div>
+        <button class="btn btn-outline" onclick="loadStats()">⟳ Refresh</button>
+      </div>
+      <div class="stats-grid" id="statsGrid" style="grid-template-columns:repeat(auto-fit,minmax(200px,1fr))">
+        <div class="stat-card"><div class="stat-label">Total Submissions</div><div class="stat-val" id="s-total">—</div></div>
+        <div class="stat-card"><div class="stat-label">Last 24 Hours</div><div class="stat-val" id="s-24h">—</div></div>
+        <div class="stat-card"><div class="stat-label">Last 7 Days</div><div class="stat-val" id="s-7d">—</div></div>
+      </div>
+      <div id="sectorChart" style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:2rem;margin-top:1.5rem;">
+        <h3 style="font-family:'Orbitron',monospace;font-size:.95rem;margin-bottom:1.5rem;color:var(--silver)">Top Sectors</h3>
+        <div id="sectorBars"></div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- DETAIL MODAL -->
+<div class="modal-overlay" id="detailModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 id="modal-name">Submission Details</h3>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div id="modal-body"></div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+  // ── STATE ──────────────────────────────────────────────────────────────
+  let currentPage   = 1;
+  let totalPages    = 1;
+  let searchTimeout = null;
+  let currentId     = null;
+
+  // ── VIEW SWITCHER ──────────────────────────────────────────────────────
+  function showView(name) {
+    document.getElementById('view-submissions').style.display = name === 'submissions' ? '' : 'none';
+    document.getElementById('view-stats').style.display       = name === 'stats'       ? '' : 'none';
+    document.querySelectorAll('.nav-item').forEach((el, i) => {
+      el.classList.toggle('active', (name === 'submissions' && i === 0) || (name === 'stats' && i === 1));
+    });
+    if (name === 'stats') loadStats();
+  }
+
+  // ── API HELPER ─────────────────────────────────────────────────────────
+  async function api(path, opts = {}) {
+    const res = await fetch(path, {
+      headers: { 'Content-Type': 'application/json', ...opts.headers },
+      ...opts
+    });
+    return res.json();
+  }
+
+  // ── LOAD SUBMISSIONS ───────────────────────────────────────────────────
+  async function loadSubmissions() {
+    const search = document.getElementById('searchInput').value.trim();
+    const status = document.getElementById('statusFilter').value;
+    let url = `/api/admin/submissions?page=${currentPage}&limit=15`;
+    if (search) url += `&search=${encodeURIComponent(search)}`;
+    if (status) url += `&status=${status}`;
+
+    const data = await api(url);
+    if (!data.success) { showToast('Failed to load submissions', 'error'); return; }
+
+    renderTable(data.data);
+    renderPagination(data.meta);
+    renderMiniStats(data.meta);
+  }
+
+  function renderTable(rows) {
+    const tbody = document.getElementById('tableBody');
+    if (!rows.length) {
+      tbody.innerHTML = `<tr><td colspan="8"><div class="empty-state"><div class="icon">📭</div><p>No submissions found</p></div></td></tr>`;
+      return;
+    }
+    tbody.innerHTML = rows.map((r, i) => `
+      <tr>
+        <td style="color:var(--muted);font-size:.8rem">${i + 1}</td>
+        <td>
+          <div class="td-name">${esc(r.name)}</div>
+          <div class="td-company">${r.company ? esc(r.company) : '—'}</div>
+        </td>
+        <td><div class="td-email">${esc(r.email)}</div>
+             <div style="font-size:.78rem;color:var(--muted)">${r.role || ''}</div></td>
+        <td><div class="td-sectors">${r.sectors ? esc(r.sectors).replace(/,\s*/g,'<br/>') : '—'}</div></td>
+        <td><div class="td-msg" title="${esc(r.message)}">${esc(r.message)}</div></td>
+        <td><span class="badge badge-${r.status}">${r.status}</span></td>
+        <td class="td-date">${formatDate(r.created_at)}</td>
+        <td>
+          <div class="td-actions">
+            <button class="btn btn-outline btn-sm" onclick="openDetail('${r.id}')">View</button>
+            <button class="btn btn-danger  btn-sm" onclick="deleteRow('${r.id}')">Del</button>
+          </div>
+        </td>
+      </tr>
+    `).join('');
+  }
+
+  function renderPagination({ total, page, pages, limit }) {
+    currentPage = page;
+    totalPages  = pages;
+    const start = (page - 1) * limit + 1;
+    const end   = Math.min(page * limit, total);
+    document.getElementById('pageInfo').textContent = `Showing ${start}–${end} of ${total}`;
+    document.getElementById('btnPrev').disabled = page <= 1;
+    document.getElementById('btnNext').disabled = page >= pages;
+  }
+
+  function renderMiniStats({ by_status, total }) {
+    document.getElementById('sc-total').textContent = total;
+    const counts = {};
+    by_status.forEach(s => counts[s.status] = s.count);
+    document.getElementById('sc-new').textContent       = counts.new       || 0;
+    document.getElementById('sc-contacted').textContent = counts.contacted || 0;
+    document.getElementById('sc-approved').textContent  = counts.approved  || 0;
+  }
+
+  // ── PAGINATION ─────────────────────────────────────────────────────────
+  function prevPage() { if (currentPage > 1) { currentPage--; loadSubmissions(); } }
+  function nextPage() { if (currentPage < totalPages) { currentPage++; loadSubmissions(); } }
+
+  // ── SEARCH DEBOUNCE ────────────────────────────────────────────────────
+  function debounceSearch() {
+    clearTimeout(searchTimeout);
+    searchTimeout = setTimeout(() => { currentPage = 1; loadSubmissions(); }, 400);
+  }
+
+  // ── DETAIL MODAL ───────────────────────────────────────────────────────
+  async function openDetail(id) {
+    currentId = id;
+    const data = await api(`/api/admin/submissions/${id}`);
+    if (!data.success) { showToast('Could not load detail', 'error'); return; }
+    const r = data.data;
+    document.getElementById('modal-name').textContent = r.name;
+    document.getElementById('modal-body').innerHTML = `
+      <div class="detail-row"><div class="detail-key">Email</div>    <div class="detail-val" style="color:var(--cyan)">${esc(r.email)}</div></div>
+      <div class="detail-row"><div class="detail-key">Company</div>  <div class="detail-val">${r.company || '—'}</div></div>
+      <div class="detail-row"><div class="detail-key">Phone</div>    <div class="detail-val">${r.phone || '—'}</div></div>
+      <div class="detail-row"><div class="detail-key">Role</div>     <div class="detail-val">${r.role || '—'}</div></div>
+      <div class="detail-row"><div class="detail-key">Team</div>     <div class="detail-val">${r.team_size || '—'}</div></div>
+      <div class="detail-row"><div class="detail-key">Sectors</div>  <div class="detail-val" style="color:var(--teal)">${r.sectors || '—'}</div></div>
+      <div class="detail-row"><div class="detail-key">Submitted</div><div class="detail-val">${formatDate(r.created_at)}</div></div>
+      <div class="detail-row"><div class="detail-key">IP</div>       <div class="detail-val" style="color:var(--muted);font-family:'Space Mono',monospace;font-size:.8rem">${r.ip}</div></div>
+      <hr style="border:none;border-top:1px solid var(--border);margin:1rem 0"/>
+      <p style="font-size:.75rem;letter-spacing:.1em;color:var(--muted);margin-bottom:.6rem">MESSAGE</p>
+      <div class="detail-msg">${esc(r.message)}</div>
+      <p style="font-size:.75rem;letter-spacing:.1em;color:var(--muted);margin-bottom:.6rem">STATUS</p>
+      <div class="modal-status-row">
+        ${['new','contacted','approved','rejected'].map(s => `
+          <button class="btn btn-sm ${r.status === s ? 'btn-cyan' : 'btn-outline'}" id="sbtn-${s}" onclick="setStatus('${s}')">${s}</button>
+        `).join('')}
+      </div>
+      <p style="font-size:.75rem;letter-spacing:.1em;color:var(--muted);margin:.8rem 0 .4rem">INTERNAL NOTES</p>
+      <textarea class="notes-input" id="notesInput" placeholder="Add internal notes…">${r.notes || ''}</textarea>
+      <div style="display:flex;gap:.75rem;margin-top:1rem;justify-content:flex-end">
+        <button class="btn btn-outline" onclick="closeModal()">Cancel</button>
+        <button class="btn btn-cyan"    onclick="saveDetail()">Save Changes</button>
+      </div>
+    `;
+    document.getElementById('detailModal').classList.add('open');
+  }
+
+  function closeModal() { document.getElementById('detailModal').classList.remove('open'); currentId = null; }
+
+  function setStatus(s) {
+    ['new','contacted','approved','rejected'].forEach(x => {
+      const b = document.getElementById(`sbtn-${x}`);
+      if (b) b.className = `btn btn-sm ${x === s ? 'btn-cyan' : 'btn-outline'}`;
+    });
+  }
+  function getSelectedStatus() {
+    return ['new','contacted','approved','rejected'].find(s => {
+      const b = document.getElementById(`sbtn-${s}`);
+      return b && b.classList.contains('btn-cyan');
+    });
+  }
+
+  async function saveDetail() {
+    const status = getSelectedStatus();
+    const notes  = document.getElementById('notesInput').value;
+    const data   = await api(`/api/admin/submissions/${currentId}`, {
+      method: 'PATCH',
+      body: JSON.stringify({ status, notes })
+    });
+    if (data.success) { showToast('Saved successfully ✓', 'success'); closeModal(); loadSubmissions(); }
+    else showToast('Save failed', 'error');
+  }
+
+  async function deleteRow(id) {
+    if (!confirm('Delete this submission? This cannot be undone.')) return;
+    const data = await api(`/api/admin/submissions/${id}`, { method: 'DELETE' });
+    if (data.success) { showToast('Deleted ✓', 'success'); loadSubmissions(); }
+    else showToast('Delete failed', 'error');
+  }
+
+  // ── EXPORT ────────────────────────────────────────────────────────────
+  function exportCSV() {
+    window.open('/api/admin/export', '_blank');
+  }
+
+  // ── ANALYTICS ─────────────────────────────────────────────────────────
+  async function loadStats() {
+    const data = await api('/api/admin/stats');
+    if (!data.success) return;
+    const d = data.data;
+    document.getElementById('s-total').textContent = d.total;
+    document.getElementById('s-24h').textContent   = d.recent24h;
+    document.getElementById('s-7d').textContent    = d.recent7d;
+
+    const maxCount = Math.max(...(d.top_sectors.map(s => s.count)), 1);
+    document.getElementById('sectorBars').innerHTML = d.top_sectors.length
+      ? d.top_sectors.map(s => `
+          <div style="margin-bottom:1rem">
+            <div style="display:flex;justify-content:space-between;margin-bottom:.4rem">
+              <span style="color:var(--silver);font-size:.9rem">${esc(s.sectors)}</span>
+              <span style="color:var(--cyan);font-family:'Space Mono',monospace;font-size:.8rem">${s.count}</span>
+            </div>
+            <div style="height:6px;background:rgba(0,200,255,.1);border-radius:3px">
+              <div style="height:100%;width:${Math.round((s.count/maxCount)*100)}%;background:linear-gradient(90deg,var(--cyan),var(--teal));border-radius:3px;transition:width .6s ease"></div>
+            </div>
+          </div>
+        `).join('')
+      : '<p style="color:var(--muted)">No sector data yet</p>';
+  }
+
+  // ── TOAST ─────────────────────────────────────────────────────────────
+  function showToast(msg, type = 'success') {
+    const t = document.getElementById('toast');
+    t.textContent = type === 'success' ? '✓ ' + msg : '✗ ' + msg;
+    t.className   = `toast ${type} show`;
+    setTimeout(() => t.classList.remove('show'), 3000);
+  }
+
+  // ── UTILS ──────────────────────────────────────────────────────────────
+  function esc(s) {
+    return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+  function formatDate(iso) {
+    const d = new Date(iso + (iso.endsWith('Z') ? '' : 'Z'));
+    return d.toLocaleDateString('en-IN', { day:'2-digit', month:'short', year:'numeric' })
+      + ' ' + d.toLocaleTimeString('en-IN', { hour:'2-digit', minute:'2-digit' });
+  }
+
+  // ── INIT ───────────────────────────────────────────────────────────────
+  loadSubmissions();
+  // Close modal on overlay click
+  document.getElementById('detailModal').addEventListener('click', function(e) {
+    if (e.target === this) closeModal();
+  });
+</script>
+</body>
+</html>
