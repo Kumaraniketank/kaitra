@@ -408,7 +408,7 @@
   async function loadSubmissions() {
     const search = document.getElementById('searchInput').value.trim();
     const status = document.getElementById('statusFilter').value;
-    let url = `/api/admin/submissions?page=${currentPage}&limit=15`;
+    let url = `/api/admin/submissions?page=${currentPage}&limit=20`;
     if (search) url += `&search=${encodeURIComponent(search)}`;
     if (status) url += `&status=${status}`;
 
