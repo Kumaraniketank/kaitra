@@ -4,7 +4,7 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Kaitra Research — AI for Scientific Discovery</title>
-  <link rel="icon" type="image/jpeg" href="1000136688.jpg"/>
+  <link rel="icon" type="image/jpeg" href="logo.jpeg"/>
   <meta name="description" content="Kaitra Research accelerates scientific discovery with AI literature analysis, hypothesis generation, and experiment optimization at scale."/>
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=Rajdhani:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet"/>
   <style>
@@ -89,20 +89,74 @@
     .footer-copy{color:var(--muted);font-size:.82rem}
     .reveal{opacity:0;transform:translateY(28px);transition:opacity .7s,transform .7s}
     .reveal.visible{opacity:1;transform:translateY(0)}
-    @media(max-width:900px){.use-cases{grid-template-columns:1fr}}
-    @media(max-width:600px){section{padding:80px 4%}.cta-box{padding:3rem 1.5rem}}
+    .hamburger{display:none;flex-direction:column;gap:5px;background:none;border:none;cursor:pointer;padding:4px}
+    .hamburger span{display:block;width:24px;height:2px;background:var(--cyan);border-radius:2px;transition:all .3s}
+    .hamburger.open span:nth-child(1){transform:translateY(7px) rotate(45deg)}
+    .hamburger.open span:nth-child(2){opacity:0}
+    .hamburger.open span:nth-child(3){transform:translateY(-7px) rotate(-45deg)}
+    .mobile-menu{display:none;position:fixed;top:70px;left:0;right:0;z-index:99;background:rgba(5,8,16,0.98);border-bottom:1px solid var(--border);flex-direction:column;padding:1rem 5%}
+    .mobile-menu.open{display:flex}
+    .mobile-menu a{padding:.9rem 0;color:var(--silver);text-decoration:none;font-weight:600;font-size:1rem;letter-spacing:.05em;border-bottom:1px solid rgba(0,200,255,.07);transition:color .2s}
+    .mobile-menu a:last-child{border-bottom:none}
+    .mobile-menu a:hover{color:var(--cyan)}
+    .mobile-menu .m-cta{color:var(--cyan)!important;margin-top:.5rem}
+    @media(max-width:1024px){.features-grid{grid-template-columns:repeat(2,1fr)}}
+    @media(max-width:900px){
+      .nav-links{display:none}.hamburger{display:flex}
+      .use-cases{grid-template-columns:1fr;gap:1.5rem}
+      .hero{padding:100px 6% 60px}
+      .hero-stats{gap:1.5rem 2rem}
+      .features-grid{grid-template-columns:1fr 1fr;gap:1rem}
+      .testimonial-grid{grid-template-columns:1fr}
+    }
+    @media(max-width:600px){
+      section{padding:70px 5%}
+      .hero{padding:90px 5% 50px;min-height:auto}
+      .sector-icon{font-size:3.5rem}
+      .hero-stats{gap:1rem;flex-wrap:wrap;justify-content:center}
+      .h-stat{min-width:80px}
+      .h-stat-num{font-size:1.5rem}
+      .hero-btns{flex-direction:column;width:100%;align-items:center}
+      .btn-primary,.btn-outline{width:90%;text-align:center;padding:.85rem 1rem}
+      .features-grid{grid-template-columns:1fr;gap:1rem}
+      .feature-card{padding:1.5rem}
+      .use-case-item{padding:1.2rem}
+      .cta-box{padding:3rem 1.5rem}
+      .other-sectors{gap:.6rem}
+      .sector-pill{font-size:.8rem;padding:.5rem .9rem}
+      .test-card{padding:1.5rem}
+      nav{padding:0 4%}
+      footer{flex-direction:column;text-align:center;gap:.8rem}
+    }
+    @media(max-width:400px){
+      .h-stat-num{font-size:1.3rem}
+      .section-title{font-size:1.5rem}
+      .features-grid{grid-template-columns:1fr}
+    }
   </style>
 </head>
 <body>
 <div class="circuit-grid"></div>
 <nav>
-  <a class="nav-logo" href="index.html"><img src="1000136688.jpg" alt="Kaitra.ai"/><span>KAITRA.AI</span></a>
+  <a class="nav-logo" href="index.html"><img src="logo.jpeg" alt="Kaitra.ai"/><span>KAITRA.AI</span></a>
   <ul class="nav-links">
     <li><a href="index.html#services">All Solutions</a></li>
     <li><a href="index.html#about">About</a></li>
     <li><a href="index.html#contact" class="nav-cta">Get Early Access</a></li>
   </ul>
+  <button class="hamburger" id="ham" aria-label="Menu" onclick="toggleMenu()">
+    <span></span><span></span><span></span>
+  </button>
 </nav>
+<div class="mobile-menu" id="mob">
+  <a href="index.html#services" onclick="closeMenu()">All Solutions</a>
+  <a href="index.html#about"    onclick="closeMenu()">About</a>
+  <a href="health.html"         onclick="closeMenu()">🏥 Health</a>
+  <a href="finance.html"        onclick="closeMenu()">📈 Finance</a>
+  <a href="research.html"       onclick="closeMenu()">🔬 Research</a>
+  <a href="security.html"       onclick="closeMenu()">🔐 Security</a>
+  <a href="index.html#contact"  onclick="closeMenu()" class="m-cta">Get Early Access</a>
+</div>
 
 <section class="hero">
   <div class="sector-badge"><span class="sector-dot"></span>KAITRA RESEARCH</div>
@@ -194,13 +248,16 @@
 </section>
 
 <footer>
-  <a class="footer-logo" href="index.html"><img src="1000136688.jpg" alt="Kaitra.ai"/><span>KAITRA.AI</span></a>
-  <p class="footer-copy">© 2025 Kaitra.ai — AI for Every Human</p>
+  <a class="footer-logo" href="index.html"><img src="logo.jpeg" alt="Kaitra.ai"/><span>KAITRA.AI</span></a>
+  <p class="footer-copy">© 2026 Kaitra.ai — AI for Every Human</p>
 </footer>
 <script>
   const reveals=document.querySelectorAll('.reveal');
   const obs=new IntersectionObserver(entries=>{entries.forEach((e,i)=>{if(e.isIntersecting){setTimeout(()=>e.target.classList.add('visible'),i*80);obs.unobserve(e.target)}})},{threshold:.1});
   reveals.forEach(el=>obs.observe(el));
+  function toggleMenu(){document.getElementById('ham').classList.toggle('open');document.getElementById('mob').classList.toggle('open')}
+  function closeMenu(){document.getElementById('ham').classList.remove('open');document.getElementById('mob').classList.remove('open')}
+  window.addEventListener('scroll',()=>{document.querySelector('nav').style.background=window.scrollY>50?'rgba(5,8,16,0.98)':'rgba(5,8,16,0.92)'});
 </script>
 </body>
 </html>
