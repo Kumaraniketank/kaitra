@@ -11,10 +11,24 @@ const PORT       = process.env.PORT || 3000;
 const ADMIN_USER = process.env.ADMIN_USERNAME || 'admin';
 const ADMIN_PASS = process.env.ADMIN_PASSWORD || 'changeme';
 
-// ── POSTGRESQL ─────────────────────────────────────────────────────────────
+// ── NEON POSTGRESQL ────────────────────────────────────────────────────────
+// Neon requires SSL — works free forever
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
-  ssl: { rejectUnauthorized: false }
+  ssl: { rejectUnauthorized: false },
+  max: 5,
+  idleTimeoutMillis: 30000,
+  connectionTimeoutMillis: 10000,
+});
+
+// Test connection on startup
+pool.connect((err, client, release) => {
+  if (err) {
+    console.error('❌ Database connection failed:', err.message);
+  } else {
+    console.log('✅ Connected to Neon PostgreSQL');
+    release();
+  }
 });
 
 async function initDB() {
@@ -40,7 +54,7 @@ async function initDB() {
     `);
     console.log('✅ Database table ready');
   } catch (err) {
-    console.error('❌ DB init error:', err.message);
+    console.error('❌ Table creation failed:', err.message);
     process.exit(1);
   }
 }
@@ -49,10 +63,10 @@ async function initDB() {
 let transporter = null;
 if (process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS) {
   transporter = nodemailer.createTransport({
-    host: process.env.SMTP_HOST,
-    port: parseInt(process.env.SMTP_PORT) || 587,
+    host:   process.env.SMTP_HOST,
+    port:   parseInt(process.env.SMTP_PORT) || 587,
     secure: false,
-    auth: { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS }
+    auth:   { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS }
   });
 }
 
@@ -60,34 +74,58 @@ async function sendEmail(s) {
   if (!transporter || !process.env.NOTIFY_EMAIL) return;
   try {
     await transporter.sendMail({
-      from: `"Kaitra.ai" <${process.env.SMTP_USER}>`,
-      to: process.env.NOTIFY_EMAIL,
+      from:    `"Kaitra.ai" <${process.env.SMTP_USER}>`,
+      to:      process.env.NOTIFY_EMAIL,
       subject: `New Early Access — ${s.name}`,
-      html: `<div style="font-family:sans-serif;padding:20px">
-        <h2 style="color:#00c8ff">New Submission</h2>
-        <p><b>Name:</b> ${s.name}</p>
-        <p><b>Email:</b> ${s.email}</p>
-        <p><b>Company:</b> ${s.company||'—'}</p>
-        <p><b>Role:</b> ${s.role||'—'}</p>
-        <p><b>Sectors:</b> ${s.sectors||'—'}</p>
-        <p><b>Message:</b> ${s.message}</p>
-      </div>`
+      html: `
+        <div style="font-family:sans-serif;max-width:600px;background:#090d1a;
+             color:#eef4ff;border-radius:12px;overflow:hidden;margin:0 auto">
+          <div style="background:linear-gradient(135deg,#00c8ff,#0af0d8);padding:24px 32px">
+            <h2 style="margin:0;color:#050810">New Early Access Request</h2>
+            <p style="margin:4px 0 0;color:#050810;opacity:.75;font-size:.9rem">
+              ${new Date().toUTCString()}
+            </p>
+          </div>
+          <div style="padding:28px 32px">
+            ${[
+              ['Name',    s.name],
+              ['Email',   s.email],
+              ['Company', s.company   || '—'],
+              ['Phone',   s.phone     || '—'],
+              ['Role',    s.role      || '—'],
+              ['Team',    s.team_size || '—'],
+              ['Sectors', s.sectors   || '—'],
+            ].map(([k,v]) => `
+              <div style="display:flex;padding:10px 0;border-bottom:1px solid rgba(0,200,255,.08)">
+                <span style="width:100px;color:#5a6a8a;font-size:.9rem">${k}</span>
+                <span style="color:#eef4ff;font-weight:600">${v}</span>
+              </div>
+            `).join('')}
+            <div style="margin-top:20px;background:rgba(0,200,255,.06);
+                 padding:16px;border-radius:8px;border-left:3px solid #00c8ff">
+              <p style="color:#5a6a8a;font-size:.8rem;margin-bottom:8px">MESSAGE</p>
+              <p style="margin:0;line-height:1.6;color:#c8d8e8">${s.message}</p>
+            </div>
+          </div>
+        </div>
+      `
     });
-  } catch (e) { console.error('Email error:', e.message); }
+    console.log('📧 Email sent for', s.email);
+  } catch (e) {
+    console.error('Email error:', e.message);
+  }
 }
 
-// ── APP ────────────────────────────────────────────────────────────────────
+// ── EXPRESS ────────────────────────────────────────────────────────────────
 const app = express();
 
-// CRITICAL: trust proxy must be FIRST before everything else
 app.set('trust proxy', 1);
-
 app.use(cors({ origin: '*' }));
 app.use(express.json({ limit: '10kb' }));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname)));
 
-// ── AUTH MIDDLEWARE ────────────────────────────────────────────────────────
+// ── AUTH ───────────────────────────────────────────────────────────────────
 function adminAuth(req, res, next) {
   const auth    = req.headers['authorization'] || '';
   const decoded = Buffer.from(auth.replace('Basic ', ''), 'base64').toString('utf8');
@@ -97,16 +135,21 @@ function adminAuth(req, res, next) {
   return res.status(401).json({ success: false, error: 'Unauthorized' });
 }
 
-// ══════════════════════════════════════════════════════════
-// PUBLIC ROUTES
-// ══════════════════════════════════════════════════════════
+// ══════════════════════════════════════════════════════════════════════════
+//  PUBLIC ROUTES
+// ══════════════════════════════════════════════════════════════════════════
 
 // Health check
 app.get('/api/health', async (req, res) => {
   try {
     const r = await pool.query('SELECT COUNT(*) c FROM submissions');
-    res.json({ status: 'ok', submissions: parseInt(r.rows[0].c), time: new Date().toISOString() });
-  } catch(e) {
+    res.json({
+      status:      'ok',
+      db:          'Neon PostgreSQL (free forever)',
+      submissions: parseInt(r.rows[0].c),
+      time:        new Date().toISOString()
+    });
+  } catch (e) {
     res.status(500).json({ status: 'error', message: e.message });
   }
 });
@@ -124,12 +167,12 @@ app.post('/api/submissions', async (req, res) => {
     if (Object.keys(errors).length)
       return res.status(422).json({ success: false, errors });
 
-    const id = uuid();
+    const id         = uuid();
     const sectorsStr = Array.isArray(sectors) ? sectors.join(', ') : (sectors || '');
 
     await pool.query(
       `INSERT INTO submissions
-         (id, name, email, company, phone, role, team_size, sectors, message, ip, user_agent)
+         (id,name,email,company,phone,role,team_size,sectors,message,ip,user_agent)
        VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)`,
       [
         id,
@@ -147,7 +190,7 @@ app.post('/api/submissions', async (req, res) => {
     );
 
     console.log(`✅ Saved: ${name} <${email}>`);
-    sendEmail({ name, email, company, role, sectors: sectorsStr, message });
+    sendEmail({ name, email, company, phone, role, team_size, sectors: sectorsStr, message });
 
     res.status(201).json({
       success: true,
@@ -160,11 +203,11 @@ app.post('/api/submissions', async (req, res) => {
   }
 });
 
-// ══════════════════════════════════════════════════════════
-// ADMIN ROUTES
-// ══════════════════════════════════════════════════════════
+// ══════════════════════════════════════════════════════════════════════════
+//  ADMIN ROUTES
+// ══════════════════════════════════════════════════════════════════════════
 
-// List all submissions
+// List submissions
 app.get('/api/admin/submissions', adminAuth, async (req, res) => {
   try {
     const page   = Math.max(1, parseInt(req.query.page  || 1));
@@ -178,7 +221,9 @@ app.get('/api/admin/submissions', adminAuth, async (req, res) => {
     let idx    = 1;
 
     if (search) {
-      where += ` AND (name ILIKE $${idx} OR email ILIKE $${idx} OR COALESCE(company,'') ILIKE $${idx} OR COALESCE(sectors,'') ILIKE $${idx})`;
+      where += ` AND (name ILIKE $${idx} OR email ILIKE $${idx}
+                 OR COALESCE(company,'') ILIKE $${idx}
+                 OR COALESCE(sectors,'') ILIKE $${idx})`;
       params.push(`%${search}%`);
       idx++;
     }
@@ -188,23 +233,19 @@ app.get('/api/admin/submissions', adminAuth, async (req, res) => {
       idx++;
     }
 
-    const totalRes  = await pool.query(`SELECT COUNT(*) c FROM submissions ${where}`, params);
-    const total     = parseInt(totalRes.rows[0].c);
-    const rowsRes   = await pool.query(
-      `SELECT * FROM submissions ${where} ORDER BY created_at DESC LIMIT $${idx} OFFSET $${idx+1}`,
-      [...params, limit, offset]
-    );
-    const statusRes = await pool.query(`SELECT status, COUNT(*) count FROM submissions GROUP BY status`);
+    const total     = parseInt((await pool.query(`SELECT COUNT(*) c FROM submissions ${where}`, params)).rows[0].c);
+    const rows      = (await pool.query(`SELECT * FROM submissions ${where} ORDER BY created_at DESC LIMIT $${idx} OFFSET $${idx+1}`, [...params, limit, offset])).rows;
+    const byStatus  = (await pool.query(`SELECT status, COUNT(*) count FROM submissions GROUP BY status`)).rows;
 
     res.json({
       success: true,
-      data: rowsRes.rows,
+      data:    rows,
       meta: {
         total,
         page,
         limit,
-        pages: Math.ceil(total / limit) || 1,
-        by_status: statusRes.rows
+        pages:     Math.ceil(total / limit) || 1,
+        by_status: byStatus
       }
     });
   } catch (err) {
@@ -224,18 +265,19 @@ app.get('/api/admin/submissions/:id', adminAuth, async (req, res) => {
   }
 });
 
-// Update status / notes
+// Update status/notes
 app.patch('/api/admin/submissions/:id', adminAuth, async (req, res) => {
   try {
     const { status, notes } = req.body;
     const allowed = ['new','contacted','approved','rejected'];
     if (status && !allowed.includes(status))
       return res.status(400).json({ success: false, error: 'Invalid status' });
+
     await pool.query(
-      `UPDATE submissions SET
-         status     = COALESCE($1, status),
-         notes      = COALESCE($2, notes),
-         updated_at = NOW()
+      `UPDATE submissions
+         SET status     = COALESCE($1, status),
+             notes      = COALESCE($2, notes),
+             updated_at = NOW()
        WHERE id = $3`,
       [status || null, notes !== undefined ? notes : null, req.params.id]
     );
@@ -245,7 +287,7 @@ app.patch('/api/admin/submissions/:id', adminAuth, async (req, res) => {
   }
 });
 
-// Delete submission
+// Delete
 app.delete('/api/admin/submissions/:id', adminAuth, async (req, res) => {
   try {
     await pool.query('DELETE FROM submissions WHERE id=$1', [req.params.id]);
@@ -279,7 +321,11 @@ app.get('/api/admin/stats', adminAuth, async (req, res) => {
     const h24      = parseInt((await pool.query(`SELECT COUNT(*) c FROM submissions WHERE created_at >= NOW() - INTERVAL '1 day'`)).rows[0].c);
     const d7       = parseInt((await pool.query(`SELECT COUNT(*) c FROM submissions WHERE created_at >= NOW() - INTERVAL '7 days'`)).rows[0].c);
     const byStatus = (await pool.query('SELECT status, COUNT(*) count FROM submissions GROUP BY status')).rows;
-    const topSec   = (await pool.query(`SELECT sectors, COUNT(*) count FROM submissions WHERE sectors IS NOT NULL AND sectors != '' GROUP BY sectors ORDER BY count DESC LIMIT 5`)).rows;
+    const topSec   = (await pool.query(`
+      SELECT sectors, COUNT(*) count FROM submissions
+      WHERE sectors IS NOT NULL AND sectors != ''
+      GROUP BY sectors ORDER BY count DESC LIMIT 5
+    `)).rows;
     res.json({ success: true, data: { total, recent24h: h24, recent7d: d7, by_status: byStatus, top_sectors: topSec } });
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });
@@ -289,16 +335,22 @@ app.get('/api/admin/stats', adminAuth, async (req, res) => {
 // Serve admin panel
 app.get('/admin', adminAuth, (req, res) => res.sendFile(path.join(__dirname, 'admin.html')));
 
-// Catch-all
+// Catch-all → index.html
 app.get('*', (req, res) => res.sendFile(path.join(__dirname, 'index.html')));
 
 // ── START ──────────────────────────────────────────────────────────────────
 async function start() {
   await initDB();
   app.listen(PORT, () => {
-    console.log(`✅ Kaitra.ai running on port ${PORT}`);
-    console.log(`🌐 Website → http://localhost:${PORT}`);
-    console.log(`🔒 Admin   → http://localhost:${PORT}/admin`);
+    console.log(`
+╔══════════════════════════════════════════════╗
+║       KAITRA.AI — RUNNING                   ║
+╠══════════════════════════════════════════════╣
+║  🌐 Website → http://localhost:${PORT}           ║
+║  🔒 Admin   → http://localhost:${PORT}/admin      ║
+║  💾 DB      → Neon PostgreSQL (FREE FOREVER) ║
+╚══════════════════════════════════════════════╝
+    `);
   });
 }
 

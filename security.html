@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Kaitra Security — AI for Cybersecurity</title>
+  <link rel="icon" type="image/jpeg" href="1000136688.jpg"/>
+  <meta name="description" content="Kaitra Security delivers proactive threat intelligence, behavioral anomaly detection, and autonomous incident response to protect critical systems."/>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=Rajdhani:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet"/>
+  <style>
+    :root{--bg:#050810;--card:#090d1a;--cyan:#00c8ff;--teal:#0af0d8;--white:#eef4ff;--silver:#c8d8e8;--muted:#5a6a8a;--border:rgba(0,200,255,0.18);--sector:#ff5f57;--sector2:#ff3d3d}
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    html{scroll-behavior:smooth}
+    body{background:var(--bg);color:var(--white);font-family:'Rajdhani',sans-serif;overflow-x:hidden}
+    .circuit-grid{position:fixed;inset:0;z-index:0;background-image:linear-gradient(rgba(0,200,255,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(0,200,255,.03) 1px,transparent 1px);background-size:60px 60px;pointer-events:none}
+    nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:0 5%;height:70px;background:rgba(5,8,16,0.92);backdrop-filter:blur(18px);border-bottom:1px solid var(--border)}
+    .nav-logo{display:flex;align-items:center;gap:10px;text-decoration:none}
+    .nav-logo img{height:38px;width:38px;border-radius:50%;box-shadow:0 0 12px rgba(0,200,255,0.4)}
+    .nav-logo span{font-family:'Orbitron',monospace;font-weight:700;font-size:1.1rem;background:linear-gradient(90deg,var(--cyan),var(--teal));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+    .nav-links{display:flex;gap:1.5rem;align-items:center;list-style:none}
+    .nav-links a{color:var(--silver);text-decoration:none;font-weight:600;font-size:.9rem;transition:color .2s}
+    .nav-links a:hover{color:var(--cyan)}
+    .nav-cta{color:var(--cyan)!important;border:1px solid var(--cyan);padding:.45rem 1rem;border-radius:4px;transition:background .2s!important}
+    .nav-cta:hover{background:rgba(0,200,255,0.1)!important}
+    .hero{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:120px 5% 80px;position:relative;overflow:hidden}
+    .hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 50% 0%,rgba(255,95,87,0.08),transparent 60%);pointer-events:none}
+    .sector-badge{display:inline-flex;align-items:center;gap:8px;background:rgba(255,95,87,0.08);border:1px solid rgba(255,95,87,0.25);border-radius:100px;padding:.4rem 1.2rem;margin-bottom:1.5rem;font-family:'Space Mono',monospace;font-size:.72rem;color:var(--sector);letter-spacing:.15em}
+    .sector-dot{width:7px;height:7px;border-radius:50%;background:var(--sector);box-shadow:0 0 8px var(--sector);animation:pulse 2s infinite}
+    @keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(1.5)}}
+    .sector-icon{font-size:5rem;margin-bottom:1.2rem;filter:drop-shadow(0 0 20px rgba(255,95,87,0.5));animation:float 4s ease-in-out infinite}
+    @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-12px)}}
+    .hero h1{font-family:'Orbitron',monospace;font-size:clamp(2.2rem,6vw,4.5rem);font-weight:900;line-height:1.1;margin-bottom:1rem}
+    .grad{background:linear-gradient(135deg,var(--white),var(--sector),var(--cyan));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+    .hero-sub{font-size:clamp(1rem,2vw,1.2rem);color:var(--silver);max-width:600px;line-height:1.75;margin-bottom:2.5rem}
+    .hero-stats{display:flex;gap:3rem;flex-wrap:wrap;justify-content:center;margin-bottom:2.5rem}
+    .h-stat{text-align:center}
+    .h-stat-num{font-family:'Orbitron',monospace;font-size:2rem;font-weight:900;color:var(--sector)}
+    .h-stat-lbl{font-size:.8rem;color:var(--muted);letter-spacing:.1em;margin-top:.2rem}
+    .hero-btns{display:flex;gap:1rem;flex-wrap:wrap;justify-content:center}
+    .btn-primary{display:inline-block;padding:.85rem 2rem;background:linear-gradient(135deg,var(--sector),var(--sector2));color:var(--white);font-family:'Orbitron',monospace;font-weight:700;font-size:.8rem;letter-spacing:.08em;border:none;border-radius:4px;cursor:pointer;text-decoration:none;box-shadow:0 0 30px rgba(255,95,87,0.3);transition:transform .2s,box-shadow .2s}
+    .btn-primary:hover{transform:translateY(-2px);box-shadow:0 0 50px rgba(255,95,87,0.5)}
+    .btn-outline{display:inline-block;padding:.85rem 2rem;background:transparent;color:var(--sector);font-family:'Orbitron',monospace;font-weight:700;font-size:.8rem;letter-spacing:.08em;border:1px solid var(--sector);border-radius:4px;cursor:pointer;text-decoration:none;transition:background .2s}
+    .btn-outline:hover{background:rgba(255,95,87,0.08)}
+    section{position:relative;z-index:1;padding:100px 5%}
+    .section-label{font-family:'Space Mono',monospace;font-size:.7rem;letter-spacing:.2em;color:var(--sector);text-transform:uppercase;margin-bottom:.8rem}
+    .section-title{font-family:'Orbitron',monospace;font-size:clamp(1.6rem,3.5vw,2.8rem);font-weight:700;line-height:1.2;margin-bottom:1rem}
+    .section-desc{color:var(--silver);font-size:1.02rem;line-height:1.75;max-width:600px}
+    .features-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:1.5rem;margin-top:3rem}
+    .feature-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:2rem;position:relative;overflow:hidden;transition:transform .3s,border-color .3s,box-shadow .3s}
+    .feature-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--sector),var(--cyan));opacity:0;transition:opacity .3s}
+    .feature-card:hover{transform:translateY(-5px);border-color:rgba(255,95,87,0.35);box-shadow:0 20px 50px rgba(255,95,87,0.08)}
+    .feature-card:hover::before{opacity:1}
+    .feature-num{font-family:'Orbitron',monospace;font-size:.7rem;color:var(--sector);letter-spacing:.2em;margin-bottom:.8rem}
+    .feature-card h3{font-family:'Orbitron',monospace;font-size:.95rem;font-weight:700;color:var(--white);margin-bottom:.8rem}
+    .feature-card p{color:var(--silver);font-size:.92rem;line-height:1.7}
+    .feature-icon-big{font-size:2.2rem;margin-bottom:1rem}
+    .use-cases{display:grid;grid-template-columns:1fr 1fr;gap:2rem;align-items:center}
+    .use-case-list{display:flex;flex-direction:column;gap:1rem}
+    .use-case-item{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:1.5rem;display:flex;gap:1rem;align-items:flex-start;transition:border-color .2s}
+    .use-case-item:hover{border-color:rgba(255,95,87,0.4)}
+    .use-case-icon{font-size:1.8rem;flex-shrink:0}
+    .use-case-title{font-weight:700;font-size:1rem;color:var(--white);margin-bottom:.3rem}
+    .use-case-desc{color:var(--muted);font-size:.88rem;line-height:1.6}
+    .terminal{background:#050810;border:1px solid var(--border);border-radius:12px;padding:1.5rem;font-family:'Space Mono',monospace;font-size:.78rem}
+    .t-bar{display:flex;gap:7px;margin-bottom:1.2rem}
+    .t-bar span{width:11px;height:11px;border-radius:50%}
+    .t-r{background:#ff5f57}.t-y{background:#febc2e}.t-g{background:#28c840}
+    .tc{line-height:2}
+    .tc-sector{color:var(--sector)}.tc-cyan{color:var(--cyan)}.tc-muted{color:var(--muted)}.tc-white{color:var(--white)}.tc-ok{color:#28c840}
+    .cursor{display:inline-block;width:7px;height:13px;background:var(--sector);vertical-align:middle;animation:blink 1s step-end infinite}
+    @keyframes blink{50%{opacity:0}}
+    .testimonial-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:1.5rem;margin-top:2.5rem}
+    .test-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:2rem;position:relative;overflow:hidden}
+    .test-card::before{content:'"';position:absolute;top:.5rem;right:1.2rem;font-size:5rem;font-family:'Orbitron',monospace;color:rgba(255,95,87,0.06);line-height:1}
+    .test-text{color:var(--silver);font-size:.95rem;line-height:1.75;margin-bottom:1.5rem;font-style:italic}
+    .test-author{display:flex;align-items:center;gap:.8rem}
+    .test-avatar{width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg,var(--sector),var(--sector2));display:flex;align-items:center;justify-content:center;font-family:'Orbitron',monospace;font-size:.85rem;font-weight:700;color:var(--white)}
+    .test-name{font-weight:600;font-size:.95rem}
+    .test-role{color:var(--muted);font-size:.8rem}
+    .cta-box{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:5rem 3rem;text-align:center;position:relative;overflow:hidden}
+    .cta-box::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 50% 0%,rgba(255,95,87,0.08),transparent 60%);pointer-events:none}
+    .other-sectors{display:flex;gap:1rem;flex-wrap:wrap;justify-content:center;margin-top:1.5rem}
+    .sector-pill{display:flex;align-items:center;gap:.6rem;padding:.6rem 1.2rem;background:var(--card);border:1px solid var(--border);border-radius:100px;text-decoration:none;color:var(--silver);font-size:.88rem;font-weight:600;transition:all .2s}
+    .sector-pill:hover{border-color:var(--cyan);color:var(--cyan)}
+    footer{border-top:1px solid var(--border);padding:2.5rem 5%;display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:1rem}
+    .footer-logo{display:flex;align-items:center;gap:10px;text-decoration:none}
+    .footer-logo img{height:32px;width:32px;border-radius:50%}
+    .footer-logo span{font-family:'Orbitron',monospace;font-size:.95rem;font-weight:700;background:linear-gradient(90deg,var(--cyan),var(--teal));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+    .footer-copy{color:var(--muted);font-size:.82rem}
+    .reveal{opacity:0;transform:translateY(28px);transition:opacity .7s,transform .7s}
+    .reveal.visible{opacity:1;transform:translateY(0)}
+    @media(max-width:900px){.use-cases{grid-template-columns:1fr}}
+    @media(max-width:600px){section{padding:80px 4%}.cta-box{padding:3rem 1.5rem}}
+  </style>
+</head>
+<body>
+<div class="circuit-grid"></div>
+<nav>
+  <a class="nav-logo" href="index.html"><img src="1000136688.jpg" alt="Kaitra.ai"/><span>KAITRA.AI</span></a>
+  <ul class="nav-links">
+    <li><a href="index.html#services">All Solutions</a></li>
+    <li><a href="index.html#about">About</a></li>
+    <li><a href="index.html#contact" class="nav-cta">Get Early Access</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="sector-badge"><span class="sector-dot"></span>KAITRA SECURITY</div>
+  <div class="sector-icon">🔐</div>
+  <h1><span class="grad">AI for Proactive,<br/>Autonomous Security</span></h1>
+  <p class="hero-sub">Kaitra Security moves beyond reactive defense — using AI to predict threats before they strike, detect anomalies in real time, and respond autonomously to protect your critical systems 24/7.</p>
+  <div class="hero-stats">
+    <div class="h-stat"><div class="h-stat-num">99.9%</div><div class="h-stat-lbl">Threat Detection</div></div>
+    <div class="h-stat"><div class="h-stat-num">0.3s</div><div class="h-stat-lbl">Response Time</div></div>
+    <div class="h-stat"><div class="h-stat-num">70%</div><div class="h-stat-lbl">Less Security Cost</div></div>
+  </div>
+  <div class="hero-btns">
+    <a href="index.html#contact" class="btn-primary">Get Early Access</a>
+    <a href="#features" class="btn-outline">See Features</a>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section id="features">
+  <p class="section-label reveal">// CORE CAPABILITIES</p>
+  <h2 class="section-title reveal">What Kaitra Security Can Do</h2>
+  <p class="section-desc reveal">Enterprise AI security that protects networks, endpoints, applications, and identities — trained on billions of threat signals and continuously evolving.</p>
+  <div class="features-grid">
+    <div class="feature-card reveal"><div class="feature-icon-big">🎯</div><div class="feature-num">01</div><h3>Zero-Day Threat Prediction</h3><p>AI models predict novel attack vectors before they're exploited — identifying vulnerabilities in your stack that signature-based tools miss entirely.</p></div>
+    <div class="feature-card reveal"><div class="feature-icon-big">👁️</div><div class="feature-num">02</div><h3>Behavioral Anomaly Detection</h3><p>Continuous monitoring of user and system behavior — instantly flags deviations that indicate insider threats, compromised accounts, or lateral movement.</p></div>
+    <div class="feature-card reveal"><div class="feature-icon-big">⚡</div><div class="feature-num">03</div><h3>Autonomous Incident Response</h3><p>AI-driven response that isolates threats, revokes access, and patches vulnerabilities in milliseconds — without waiting for human intervention.</p></div>
+    <div class="feature-card reveal"><div class="feature-icon-big">🛡️</div><div class="feature-num">04</div><h3>AI Penetration Testing</h3><p>Continuous automated pen testing that simulates sophisticated attack chains — find your weaknesses before attackers do, at scale.</p></div>
+    <div class="feature-card reveal"><div class="feature-icon-big">🔍</div><div class="feature-num">05</div><h3>Threat Intelligence Engine</h3><p>Real-time aggregation and correlation of global threat intelligence — contextualized to your industry, geography, and tech stack.</p></div>
+    <div class="feature-card reveal"><div class="feature-icon-big">🏛️</div><div class="feature-num">06</div><h3>Compliance Automation</h3><p>Continuous audit-readiness for ISO 27001, SOC 2, GDPR, HIPAA, and more — automated evidence collection and gap analysis.</p></div>
+  </div>
+</section>
+
+<!-- USE CASES -->
+<section style="background:linear-gradient(180deg,#050810,#090d1a,#050810)">
+  <p class="section-label reveal">// USE CASES</p>
+  <h2 class="section-title reveal">Built for Every Security Team</h2>
+  <div class="use-cases" style="margin-top:3rem">
+    <div class="use-case-list">
+      <div class="use-case-item reveal"><div class="use-case-icon">🏢</div><div><div class="use-case-title">Enterprise SOC Teams</div><div class="use-case-desc">Reduce alert fatigue, automate tier-1 triage, and let analysts focus on real threats instead of false positives.</div></div></div>
+      <div class="use-case-item reveal"><div class="use-case-icon">🏦</div><div><div class="use-case-title">Banking & Financial Services</div><div class="use-case-desc">Protect customer data, detect account takeover attempts, and ensure PCI-DSS compliance continuously.</div></div></div>
+      <div class="use-case-item reveal"><div class="use-case-icon">🏥</div><div><div class="use-case-title">Healthcare Systems</div><div class="use-case-desc">Safeguard patient records, medical devices, and clinical systems against ransomware and data breaches.</div></div></div>
+      <div class="use-case-item reveal"><div class="use-case-icon">🏭</div><div><div class="use-case-title">Critical Infrastructure</div><div class="use-case-desc">AI-powered OT/ICS security to protect power grids, water systems, and manufacturing from nation-state threats.</div></div></div>
+    </div>
+    <div class="terminal reveal">
+      <div class="t-bar"><span class="t-r"></span><span class="t-y"></span><span class="t-g"></span></div>
+      <div class="tc">
+        <span class="tc-muted">// kaitra.security engine</span><br/>
+        <span class="tc-cyan">const</span> <span class="tc-white">threat</span> = <span class="tc-cyan">await</span> <span class="tc-white">kaitra.scan({</span><br/>
+        &nbsp;&nbsp;<span class="tc-white">target:</span> <span class="tc-sector">'network'</span>,<br/>
+        &nbsp;&nbsp;<span class="tc-white">depth:</span> <span class="tc-sector">'deep'</span>,<br/>
+        &nbsp;&nbsp;<span class="tc-white">realtime:</span> <span class="tc-sector">true</span><br/>
+        <span class="tc-white">})</span><br/><br/>
+        <span class="tc-muted">// ✓ Scan complete (0.3s)</span><br/>
+        <span class="tc-muted">// ✓ Threats found: <span class="tc-sector">2 critical</span></span><br/>
+        <span class="tc-muted">// ✓ Auto-patched: <span class="tc-ok">2/2</span></span><br/>
+        <span class="tc-muted">// ✓ Status: <span class="tc-ok">Secured</span></span><br/><br/>
+        <span class="tc-cyan">›</span> <span class="cursor"></span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TESTIMONIALS -->
+<section>
+  <p class="section-label reveal">// CLIENT VOICES</p>
+  <h2 class="section-title reveal">Trusted by Security Leaders</h2>
+  <div class="testimonial-grid">
+    <div class="test-card reveal"><p class="test-text">Kaitra Security detected a sophisticated supply chain attack that bypassed all our existing tools. The behavioral AI caught what signatures never could.</p><div class="test-author"><div class="test-avatar">RK</div><div><div class="test-name">Rajesh Kumar</div><div class="test-role">CISO, TechCorp India</div></div></div></div>
+    <div class="test-card reveal"><p class="test-text">We went from 4-hour mean response time to under 30 seconds. The autonomous response system is remarkable — it acts before our team even sees the alert.</p><div class="test-author"><div class="test-avatar">AM</div><div><div class="test-name">Amit Mehta</div><div class="test-role">Head of Security, FinBank</div></div></div></div>
+    <div class="test-card reveal"><p class="test-text">SOC 2 compliance used to take 6 months of preparation. With Kaitra Security, we were audit-ready in 3 weeks. The automation is game-changing.</p><div class="test-author"><div class="test-avatar">PS</div><div><div class="test-name">Priya Singh</div><div class="test-role">VP Engineering, SaaSCo</div></div></div></div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section>
+  <div class="cta-box reveal">
+    <p class="section-label">// GET STARTED</p>
+    <h2 class="section-title">Ready to Stay<br/><span style="background:linear-gradient(90deg,var(--sector),var(--cyan));-webkit-background-clip:text;-webkit-text-fill-color:transparent;">Ahead of Every Threat?</span></h2>
+    <p style="color:var(--silver);max-width:500px;margin:0 auto 2rem;font-size:1.05rem;line-height:1.7">Join security teams already using Kaitra Security to predict, detect, and respond to threats autonomously.</p>
+    <div class="hero-btns" style="justify-content:center">
+      <a href="index.html#contact" class="btn-primary">Request Early Access</a>
+      <a href="index.html#services" class="btn-outline">← All Solutions</a>
+    </div>
+    <div style="margin-top:3rem">
+      <p style="color:var(--muted);font-size:.85rem;margin-bottom:1rem">Explore Other Sectors</p>
+      <div class="other-sectors">
+        <a href="health.html"   class="sector-pill">🏥 Health</a>
+        <a href="finance.html"  class="sector-pill">📈 Finance</a>
+        <a href="research.html" class="sector-pill">🔬 Research</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <a class="footer-logo" href="index.html"><img src="1000136688.jpg" alt="Kaitra.ai"/><span>KAITRA.AI</span></a>
+  <p class="footer-copy">© 2025 Kaitra.ai — AI for Every Human</p>
+</footer>
+<script>
+  const reveals=document.querySelectorAll('.reveal');
+  const obs=new IntersectionObserver(entries=>{entries.forEach((e,i)=>{if(e.isIntersecting){setTimeout(()=>e.target.classList.add('visible'),i*80);obs.unobserve(e.target)}})},{threshold:.1});
+  reveals.forEach(el=>obs.observe(el));
+</script>
+</body>
+</html>

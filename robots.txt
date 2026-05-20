@@ -1,4 +1,12 @@
+# Kaitra.ai — robots.txt
+# Allow all search engines to crawl everything
+
 User-agent: *
 Allow: /
 
-Sitemap: https://yourdomain.com/sitemap.xml
+# Block admin panel from search engines
+Disallow: /admin
+Disallow: /api/
+
+# Sitemap location
+Sitemap: https://kaitra-ai.onrender.com/sitemap.xml
